@@ -8,10 +8,10 @@
 
 #### 系统界面截图
 1.  前端截图
-![Image text](https://gitee.com/lucklyme/web_scheduler/raw/master/%E5%89%8D%E7%AB%AF%E6%88%AA%E5%9B%BE.png)
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0319/112213_791d44bd_1419487.png "1616124103(1).png")
 
 2.  后端截图
-![Image text](https://gitee.com/lucklyme/web_scheduler/raw/master/%E5%90%8E%E7%AB%AF%E6%88%AA%E5%9B%BE.png)
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0319/112521_21e348a7_1419487.png "1616124147(1).png")
 
 
 #### 软件架构
