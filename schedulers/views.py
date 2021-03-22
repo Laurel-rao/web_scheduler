@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.forms import model_to_dict
@@ -31,7 +32,12 @@ from .exchange_mail import ExchangeEmail
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 tz = pytz.timezone('Asia/Shanghai')
-scheduler = BackgroundScheduler(timezone=tz)
+# 定义以线程方式执行任务，最多20个线程同时执行
+executors = {
+    'default': ThreadPoolExecutor(20)  # 最多20个线程同时执行
+
+}
+scheduler = BackgroundScheduler(timezone=tz, executors=executors)
 scheduler.start()
 chrome_options = webdriver.ChromeOptions()
 # 使用headless无界面浏览器模式
@@ -134,9 +140,9 @@ def more_page(web_url, kwargs):
             mask_keys = ''
             url_key = ''
             if nextbutton != '' and nextbutton is not None:
-                WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, nextbutton)))
-            else:
                 WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
+            else:
+                WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
             p = pagenum
             while p > 0:
                 pageSource = browser.page_source
@@ -144,14 +150,11 @@ def more_page(web_url, kwargs):
                 for i in matchObj:
                     web_url_list.append(base_url + i)
                 if nextbutton != '' and nextbutton is not None:
-                    browser.find_element_by_xpath(nextbutton).click()
-                    if p > 1:
-                        WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, nextbutton)))
-                    else:
-                        time.sleep(3)
-                else:
                     browser.find_element_by_partial_link_text("下一页").click()
                     WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
+                else:
+                    browser.find_element_by_partial_link_text(nextbutton).click()
+                    WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
                 p = p - 1
             monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
                              islazyload, mask_keys, url_key)
@@ -198,6 +201,8 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
                           'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36'
         }
         urllib3.disable_warnings()
+        urllib3.PoolManager(num_pools=100)
+        urllib3.PoolManager(maxsize=50)
         keywords = []
         error_list = []
         str_content = ''
@@ -209,9 +214,9 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
                 response_list = json.loads(response.content)
                 mask_keys_list = mask_keys.split('|')
                 keywords_list = str_keywords.split('|')
-                texts_list = []
                 for i in response_list:
                     for keyword in keywords_list:
+                        texts_list = []
                         for mask_key in mask_keys_list:
                             if keyword in i[mask_key]:
                                 texts_list.append(i[mask_key])
