@@ -44,7 +44,6 @@ chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
 chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
 chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
-browser = webdriver.Chrome(chrome_options=chrome_options)
 # browser.quit()
 
 
@@ -108,6 +107,7 @@ def more_page(web_url, kwargs):
     password_text = kwargs['password_text']
     login_button = kwargs['login_button']
     login_url = kwargs['login_url']
+    browser = webdriver.Chrome(chrome_options=chrome_options)
     if islogin:
         browser.get(login_url)
         WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, username_input)))
@@ -116,55 +116,58 @@ def more_page(web_url, kwargs):
         browser.find_element_by_xpath(login_button).click()
         time.sleep(3)
 
-    try:
-        web_url_list = []
-        browser.get(web_url)
-        time.sleep(3)
-        # 获取访问cookie
-        c = browser.get_cookies()
-        cookies = {}
-        # 获取cookie中的name和value,转化成requests可以使用的形式
-        for cookie in c:
-            cookies[cookie['name']] = cookie['value']
+    # try:
+    web_url_list = []
+    logger.info('进入多页面模块：' + web_url)
+    browser.get(web_url)
+    time.sleep(3)
+    # 获取访问cookie
+    c = browser.get_cookies()
+    cookies = {}
+    # 获取cookie中的name和value,转化成requests可以使用的形式
+    for cookie in c:
+        cookies[cookie['name']] = cookie['value']
 
-        # 判断是否需要读取多页
-        if oneormore == '1':
-            # 获取当前页面的源码并断言
+    # 判断是否需要读取多页
+    if oneormore == '1':
+        # 获取当前页面的源码并断言
+        pageSource = browser.page_source
+        matchObj = re.findall(pattern, pageSource)
+        for i in matchObj:
+            web_url_list.append(base_url + i)
+        monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies)
+    elif oneormore == '2':
+        islazyload = False
+        mask_keys = ''
+        url_key = ''
+        if nextbutton == '' or nextbutton is None:
+            WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
+        else:
+            WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
+        p = pagenum
+        while p > 0:
             pageSource = browser.page_source
             matchObj = re.findall(pattern, pageSource)
             for i in matchObj:
                 web_url_list.append(base_url + i)
-            monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies)
-        elif oneormore == '2':
-            islazyload = False
-            mask_keys = ''
-            url_key = ''
-            if nextbutton != '' and nextbutton is not None:
+            print(nextbutton)
+            if nextbutton == '' or nextbutton is None:
+                browser.find_element_by_partial_link_text("下一页").click()
                 WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
             else:
+                browser.find_element_by_partial_link_text(nextbutton).click()
                 WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
-            p = pagenum
-            while p > 0:
-                pageSource = browser.page_source
-                matchObj = re.findall(pattern, pageSource)
-                for i in matchObj:
-                    web_url_list.append(base_url + i)
-                if nextbutton != '' and nextbutton is not None:
-                    browser.find_element_by_partial_link_text("下一页").click()
-                    WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
-                else:
-                    browser.find_element_by_partial_link_text(nextbutton).click()
-                    WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
-                p = p - 1
-            monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
-                             islazyload, mask_keys, url_key)
-            browser.quit()
+            p = p - 1
+        monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
+                         islazyload, mask_keys, url_key)
+        browser.quit()
 
-    except Exception as e:
-        logger.warning("页面监控测序异常~！异常代码为：" + str(e))
+    # except Exception as e:
+    #     logger.warning("页面监控测序异常~！异常代码为：" + str(e))
 
 
 def get_cookie(login_url, username_input, username_text, password_input, password_text, login_button):
+    browser = webdriver.Chrome(chrome_options=chrome_options)
     browser.get(login_url)
     WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, username_input)))
     browser.find_element_by_xpath(username_input).send_keys(username_text)
@@ -194,95 +197,97 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
             login_button = job_dict['login_button']
             login_url = job_dict['login_url']
             cookies = get_cookie(login_url, username_input, username_text, password_input, password_text, login_button)
-    try:
-            # 添加头部信息
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36'
-        }
-        urllib3.disable_warnings()
-        urllib3.PoolManager(num_pools=100)
-        urllib3.PoolManager(maxsize=50)
-        keywords = []
-        error_list = []
-        str_content = ''
+    # try:
+        # 添加头部信息
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36'
+    }
+    requests.DEFAULT_RETRIES = 5  # 增加重试连接次数
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    urllib3.disable_warnings()
+    keywords = []
+    error_list = []
+    str_content = ''
 
-        # 判断是否为单页面任务且是懒加载网站
-        if str_type == 'one' and islazyload:
-            response = requests.get(web_url_list[0], headers=headers, verify=False, cookies=cookies)
+    logger.info('进入单页面模块：')
+    # 判断是否为单页面任务且是懒加载网站
+    if str_type == 'one' and islazyload:
+        response = requests.get(web_url_list[0], headers=headers, verify=False, cookies=cookies)
+        if response.status_code == 200:
+            response_list = json.loads(response.content)
+            mask_keys_list = mask_keys.split('|')
+            keywords_list = str_keywords.split('|')
+            for i in response_list:
+                for keyword in keywords_list:
+                    texts_list = []
+                    for mask_key in mask_keys_list:
+                        if keyword in i[mask_key]:
+                            texts_list.append(i[mask_key])
+                    if texts_list:
+                        match_dict = {
+                            'web_url': i[url_key],
+                            'keyword': keyword,
+                            'texts': texts_list
+                        }
+                        keywords.append(match_dict)
+        else:
+            error_list.append(web_url_list[0])
+    else:  # 非懒加载网站
+        for web_url in web_url_list:
+            response = requests.get(web_url, headers=headers, verify=False, cookies=cookies)
+
+            # 进行状态码判断，是否正确读取到网页
+            logger.info("Start monitor………………………………………………\\n监控网址为：" + str(web_url) + '\\n关键字为：' + str_keywords)
             if response.status_code == 200:
-                response_list = json.loads(response.content)
-                mask_keys_list = mask_keys.split('|')
+
                 keywords_list = str_keywords.split('|')
-                for i in response_list:
-                    for keyword in keywords_list:
+                for i in keywords_list:
+                    match_dict = dict()
+                    if i in response.content.decode():
+                        pattern = '>([^<]*' + i + '[^<]+)'
+                        # keywords.append(i)
+                        matchObj = re.findall(pattern, response.content.decode())
                         texts_list = []
-                        for mask_key in mask_keys_list:
-                            if keyword in i[mask_key]:
-                                texts_list.append(i[mask_key])
+                        for text in matchObj:
+                            texts_list.append(text)
                         if texts_list:
                             match_dict = {
-                                'web_url': i[url_key],
-                                'keyword': keyword,
+                                'web_url': web_url,
+                                'keyword': i,
                                 'texts': texts_list
                             }
                             keywords.append(match_dict)
             else:
-                error_list.append(web_url_list[0])
-        else:  # 非懒加载网站
-            for web_url in web_url_list:
-                response = requests.get(web_url, headers=headers, verify=False, cookies=cookies)
-
-                # 进行状态码判断，是否正确读取到网页
-                logger.info("Start monitor………………………………………………\\n监控网址为：" + str(web_url) + '\\n关键字为：' + str_keywords)
-                if response.status_code == 200:
-
-                    keywords_list = str_keywords.split('|')
-                    for i in keywords_list:
-                        match_dict = dict()
-                        if i in response.content.decode():
-                            pattern = '>([^<]*' + i + '[^<]+)'
-                            # keywords.append(i)
-                            matchObj = re.findall(pattern, response.content.decode())
-                            texts_list = []
-                            for text in matchObj:
-                                texts_list.append(text)
-                            if texts_list:
-                                match_dict = {
-                                    'web_url': web_url,
-                                    'keyword': i,
-                                    'texts': texts_list
-                                }
-                                keywords.append(match_dict)
-                else:
-                    error_list.append(web_url)
-        if keywords:
-            for i in keywords:
-                str_content = str_content + '网页：' + i['web_url'] + '  \n' + '检测到关键内容：\n' + \
-                               '>>> 关键字：' + i['keyword'] + '    匹配到内容如下：\n' + '\n'.join(i['texts']) + '\n\n'
-        for e in error_list:
-            str_content = str_content + '网页：' + e['web_url'] + '  \n' + '无法访问，请确认~!!：\n\n'
-        logger.info(keywords)
-        if str_content == '':
-            str_content = '网页：' + '\n'.join(web_url_list) + '\n今日无匹配项~！'
-        send_email(str_content, username, ReceiversEmail)
-        if trigger != 'cron':
-            if str_type == 'one':
-                SchedulersJob.objects.filter(id=job_id).update(enable='2', next_time=None)
-            else:
-                SchedulersJob2.objects.filter(id=job_id).update(enable='2', next_time=None)
+                error_list.append(web_url)
+    if keywords:
+        for i in keywords:
+            str_content = str_content + '网页：' + i['web_url'] + '  \n' + '检测到关键内容：\n' + \
+                           '>>> 关键字：' + i['keyword'] + '    匹配到内容如下：\n' + '\n'.join(i['texts']) + '\n\n'
+    for e in error_list:
+        str_content = str_content + '网页：' + e['web_url'] + '  \n' + '无法访问，请确认~!!：\n\n'
+    logger.info(keywords)
+    if str_content == '':
+        str_content = '网页：' + '\n'.join(web_url_list) + '\n今日无匹配项~！'
+    send_email(str_content, username, ReceiversEmail)
+    if trigger != 'cron':
+        if str_type == 'one':
+            SchedulersJob.objects.filter(id=job_id).update(enable='2', next_time=None)
         else:
-            if str_type == 'one':
-                job = scheduler.get_job('job_id_' + str(job_id) + '_' + str_type)
-                next_time = job.next_run_time
-                SchedulersJob.objects.filter(id=job_id).update(next_time=next_time)
-            else:
-                job = scheduler.get_job('job_id_' + str(job_id) + '_' + str_type)
-                next_time = job.next_run_time
-                SchedulersJob2.objects.filter(id=job_id).update(next_time=next_time)
-        logger.info("monitor Finish~!")
-    except RequestException as e:
-        logger.warning("页面监控测序异常~！异常代码为：" + str(e))
+            SchedulersJob2.objects.filter(id=job_id).update(enable='2', next_time=None)
+    else:
+        if str_type == 'one':
+            job = scheduler.get_job('job_id_' + str(job_id) + '_' + str_type)
+            next_time = job.next_run_time
+            SchedulersJob.objects.filter(id=job_id).update(next_time=next_time)
+        else:
+            job = scheduler.get_job('job_id_' + str(job_id) + '_' + str_type)
+            next_time = job.next_run_time
+            SchedulersJob2.objects.filter(id=job_id).update(next_time=next_time)
+    logger.info("monitor Finish~!")
+    # except RequestException as e:
+    #     logger.warning("页面监控测序异常~！异常代码为：" + str(e))
         # str_keywords = "页面监控测序异常~！异常代码为：" + str(e)
     # finally:
     #     send_email(str_keywords, username)
