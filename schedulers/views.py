@@ -129,17 +129,18 @@ def more_page(web_url, kwargs):
             cookies[cookie['name']] = cookie['value']
 
         # 判断是否需要读取多页
+        islazyload = False
+        mask_keys = ''
+        url_key = ''
         if oneormore == '1':
             # 获取当前页面的源码并断言
             pageSource = browser.page_source
             matchObj = re.findall(pattern, pageSource)
             for i in matchObj:
                 web_url_list.append(base_url + i)
-            monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies)
+            monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
+                             islazyload, mask_keys, url_key)
         elif oneormore == '2':
-            islazyload = False
-            mask_keys = ''
-            url_key = ''
             if nextbutton == '' or nextbutton is None:
                 WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
             else:
