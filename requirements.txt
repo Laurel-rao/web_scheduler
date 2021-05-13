@@ -1,3 +1,4 @@
+selenium
 cryptography
 APScheduler==3.6.3
 asgiref==3.3.1

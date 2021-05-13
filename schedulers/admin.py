@@ -7,7 +7,7 @@ from.forms import EmailForm
 
 
 class SchedulersJobAdmin(admin.ModelAdmin):
-    exclude = ('job_id', 'next_time', 'author', 'type')
+    exclude = ('next_time', 'author', 'type')
     """设置列表可显示的字段"""
     list_display = ('name', 'web_url', 'keywords', 'trigger', 'DateSchedulers', 'IntervalSchedulers', 'CronSchedulers'
                     , 'author',)

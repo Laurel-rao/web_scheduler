@@ -42,7 +42,7 @@ class CronSchedulers(models.Model):
     month = models.CharField(max_length=50, verbose_name='月份(1-12)', blank=True, null=True)
     day = models.CharField(max_length=50, verbose_name='日期(1-31)', blank=True, null=True)
     week = models.CharField(max_length=50, verbose_name='周数(1-53)', blank=True, null=True)
-    day_of_week = models.CharField(max_length=50, verbose_name='工作日(0-6)', blank=True, null=True)
+    day_of_week = models.CharField(max_length=50, verbose_name='工作日(0-6)；0为周一', blank=True, null=True)
     hour = models.CharField(max_length=50, verbose_name='小时(0-23)', blank=True, null=True)
     minute = models.CharField(max_length=50, verbose_name='分钟(0-59)', blank=True, null=True)
     second = models.CharField(max_length=50, verbose_name='秒数(0-59)', blank=True, null=True)

@@ -18,6 +18,7 @@ from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 from .models import SchedulersJob, DateSchedulers, CronSchedulers, IntervalSchedulers, Email, SchedulersJob2
 import json
@@ -29,7 +30,10 @@ from .exchange_mail import ExchangeEmail
 
 
 # Create your views here.
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,  # 控制台打印的日志级别
+                    filename='new.log',  # 输出的日志文件名
+                    filemode='a',  # 模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志，a是追加模式，默认如果不写的话，就是追加模式
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 日志格式
 logger = logging.getLogger(__name__)
 tz = pytz.timezone('Asia/Shanghai')
 # 定义以线程方式执行任务，最多20个线程同时执行
@@ -39,12 +43,22 @@ executors = {
 }
 scheduler = BackgroundScheduler(timezone=tz, executors=executors)
 scheduler.start()
-chrome_options = webdriver.ChromeOptions()
-# 使用headless无界面浏览器模式
-chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
-chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
-chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
-# browser.quit()
+
+
+def get_browser():
+    chrome_options = webdriver.ChromeOptions()
+    # 使用headless无界面浏览器模式
+    # chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
+    chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
+    chrome_options.add_argument("--disable-blink-features")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
+    chrome_options.add_argument('--user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                                '(KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36 Edg/90.0.818.39')
+    driver = webdriver.Chrome(options=chrome_options)
+    return driver
 
 
 @csrf_exempt
@@ -107,7 +121,7 @@ def more_page(web_url, kwargs):
     password_text = kwargs['password_text']
     login_button = kwargs['login_button']
     login_url = kwargs['login_url']
-    browser = webdriver.Chrome(chrome_options=chrome_options)
+    browser = get_browser()
     if islogin:
         browser.get(login_url)
         WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, username_input)))
@@ -142,23 +156,26 @@ def more_page(web_url, kwargs):
                              islazyload, mask_keys, url_key)
         elif oneormore == '2':
             if nextbutton == '' or nextbutton is None:
-                WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
+                WebDriverWait(browser, 20).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
             else:
-                WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
+                WebDriverWait(browser, 20).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
             p = pagenum
             while p > 0:
-                pageSource = browser.page_source
-                matchObj = re.findall(pattern, pageSource)
-                for i in matchObj:
-                    web_url_list.append(base_url + i)
-                print(nextbutton)
-                if nextbutton == '' or nextbutton is None:
-                    browser.find_element_by_partial_link_text("下一页").click()
-                    WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
-                else:
-                    browser.find_element_by_partial_link_text(nextbutton).click()
-                    WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
-                p = p - 1
+                try:
+                    pageSource = browser.page_source
+                    matchObj = re.findall(pattern, pageSource)
+                    for i in matchObj:
+                        web_url_list.append(base_url + i)
+                    # print(nextbutton)
+                    if nextbutton == '' or nextbutton is None:
+                        browser.find_element_by_partial_link_text("下一页").click()
+                        WebDriverWait(browser, 20).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, '下一页')))
+                    else:
+                        browser.find_element_by_partial_link_text(nextbutton).click()
+                        WebDriverWait(browser, 20).until(ec.visibility_of_element_located((By.PARTIAL_LINK_TEXT, nextbutton)))
+                    p = p - 1
+                except NoSuchElementException:
+                    break
             monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
                              islazyload, mask_keys, url_key)
         browser.quit()
@@ -167,7 +184,7 @@ def more_page(web_url, kwargs):
 
 
 def get_cookie(login_url, username_input, username_text, password_input, password_text, login_button):
-    browser = webdriver.Chrome(chrome_options=chrome_options)
+    browser = get_browser()
     browser.get(login_url)
     WebDriverWait(browser, 10).until(ec.visibility_of_element_located((By.XPATH, username_input)))
     browser.find_element_by_xpath(username_input).send_keys(username_text)
@@ -269,7 +286,7 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
             str_content = str_content + '网页：' + e['web_url'] + '  \n' + '无法访问，请确认~!!：\n\n'
         logger.info(keywords)
         if str_content == '':
-            str_content = '网页：' + '\n'.join(web_url_list) + '\n今日无匹配项~！'
+            str_content = '网页：' + web_url_list[0].split('/')[2] + '\n今日无匹配项~！'
         send_email(str_content, username, ReceiversEmail)
         if trigger != 'cron':
             if str_type == 'one':
