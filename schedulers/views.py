@@ -33,6 +33,7 @@ from .exchange_mail import ExchangeEmail
 logging.basicConfig(level=logging.INFO,  # 控制台打印的日志级别
                     filename='new.log',  # 输出的日志文件名
                     filemode='a',  # 模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志，a是追加模式，默认如果不写的话，就是追加模式
+                    datefmt='%Y-%m-%d %A %H:%M:%S',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # 日志格式
 logger = logging.getLogger(__name__)
 tz = pytz.timezone('Asia/Shanghai')
@@ -57,6 +58,13 @@ def get_browser():
     chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
     chrome_options.add_argument('--user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                                 '(KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36 Edg/90.0.818.39')
+    # 不加载图片
+    prefs = {
+        'profile.default_content_setting_values': {
+            'images': 2,
+        }
+    }
+    chrome_options.add_experimental_option('prefs', prefs)
     driver = webdriver.Chrome(options=chrome_options)
     return driver
 
