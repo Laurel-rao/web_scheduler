@@ -4,6 +4,7 @@ import requests
 import urllib3
 import smtplib
 from email.mime.text import MIMEText
+from bs4 import BeautifulSoup
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
@@ -49,7 +50,7 @@ scheduler.start()
 def get_browser():
     chrome_options = webdriver.ChromeOptions()
     # 使用headless无界面浏览器模式
-    chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
+    # chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
     chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
@@ -65,8 +66,8 @@ def get_browser():
         }
     }
     chrome_options.add_experimental_option('prefs', prefs)
-    # driver = webdriver.Chrome(options=chrome_options)
-    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
+    # driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=chrome_options)
     return driver
 
 
@@ -264,16 +265,30 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
                 error_list.append(web_url_list[0])
         else:  # 非懒加载网站
             for web_url in web_url_list:
+                print(web_url)
                 response = requests.get(web_url, headers=headers, verify=False, cookies=cookies)
 
                 # 进行状态码判断，是否正确读取到网页
                 logger.info("Start monitor………………………………………………\\n监控网址为：" + str(web_url) + '\\n关键字为：' + str_keywords)
                 if response.status_code == 200:
                     web_content = ""
-                    if response.apparent_encoding.upper() == "GB2312":
-                        web_content = response.content.decode("gb2312", "ignore")
-                    elif "utf" in response.apparent_encoding.lower():
-                        web_content = response.content.decode("utf8", "ignore")
+                    response.encoding = response.apparent_encoding
+                    # 因为网站使用的不是通用的utf-8格式，而是gzip或gb2312等，所以要让它判断解码格式
+
+                    if job_dict['selector']:
+                        html = BeautifulSoup(response.text, 'lxml')
+                        # 获取到的网页信息需要进行解析，使用lxml解析器，其实默认的解析器就是lxml，但是这里会出现警告提示，方便你对其他平台移植
+                        content = html.select(job_dict['selector'])
+                        # 将复制好的选择器信息放进select方法中，将获取到的内容作为tag形式放入一个列表中
+                        # print(content[0].get_text())
+                        if len(content) == 0:
+                            web_content = response.text
+                        else:
+                            web_content = str(content[0])
+                        # 输出这个列表中第一个内容，就是我们要获得的信息
+                    else:
+                        web_content = response.text
+
                     keywords_list = str_keywords.split('|')
                     for i in keywords_list:
                         match_dict = dict()
@@ -299,7 +314,7 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
                                '>>> 关键字：' + i['keyword'] + '    匹配到内容如下：\n' + '\n'.join(i['texts']) + '\n\n'
         for e in error_list:
             str_content = str_content + '网页：' + e['web_url'] + '  \n' + '无法访问，请确认~!!：\n\n'
-        logger.info(keywords)
+        # logger.info(keywords)
         if str_content == '':
             str_content = '网页：' + job_dict['web_url'] + '  当前查询时间点：' + time.strftime("%m/%d/%Y %H:%M") + '，暂无无匹配项~！'
         send_email(str_content, username, ReceiversEmail)

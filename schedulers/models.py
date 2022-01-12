@@ -131,6 +131,7 @@ class SchedulersJob2(models.Model):
     keywords = models.CharField(max_length=100, verbose_name='关键字(多个用 | 分开)')
     pattern = models.CharField(max_length=100, verbose_name='正则表达式模式')
     base_url = models.CharField(max_length=100, verbose_name='根网址')
+    selector = models.CharField(max_length=100, verbose_name='指定区域selector', blank=True, null=True)
     trigger = models.CharField(choices=TRIGGER, max_length=10, verbose_name='触发器类型')
     DateSchedulers = models.OneToOneField(DateSchedulers, on_delete=models.CASCADE
                                           , verbose_name='特定的时间点触发器', blank=True, null=True)
