@@ -49,7 +49,7 @@ scheduler.start()
 def get_browser():
     chrome_options = webdriver.ChromeOptions()
     # 使用headless无界面浏览器模式
-    # chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
+    chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
     chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
@@ -65,7 +65,8 @@ def get_browser():
         }
     }
     chrome_options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(options=chrome_options)
+    # driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=chrome_options)
     return driver
 
 
@@ -212,6 +213,8 @@ def get_cookie(login_url, username_input, username_text, password_input, passwor
 def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, username, ReceiversEmail, cookies,
                      islazyload, mask_keys, url_key):
     cookies = cookies
+    job_dict = {}
+    job_dict = model_to_dict(SchedulersJob2.objects.get(id=job_id))
     if str_type == 'one':
         job_dict = model_to_dict(SchedulersJob.objects.get(id=job_id))
         if job_dict['islogin']:
@@ -266,14 +269,18 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
                 # 进行状态码判断，是否正确读取到网页
                 logger.info("Start monitor………………………………………………\\n监控网址为：" + str(web_url) + '\\n关键字为：' + str_keywords)
                 if response.status_code == 200:
-
+                    web_content = ""
+                    if response.apparent_encoding.upper() == "GB2312":
+                        web_content = response.content.decode("gb2312", "ignore")
+                    elif "utf" in response.apparent_encoding.lower():
+                        web_content = response.content.decode("utf8", "ignore")
                     keywords_list = str_keywords.split('|')
                     for i in keywords_list:
                         match_dict = dict()
-                        if i in response.content.decode():
+                        if i in web_content:
                             pattern = '>([^<]*' + i + '[^<]+)'
                             # keywords.append(i)
-                            matchObj = re.findall(pattern, response.content.decode())
+                            matchObj = re.findall(pattern, web_content)
                             texts_list = []
                             for text in matchObj:
                                 texts_list.append(text)
@@ -294,7 +301,7 @@ def monitor_one_page(web_url_list, str_keywords, trigger, job_id, str_type, user
             str_content = str_content + '网页：' + e['web_url'] + '  \n' + '无法访问，请确认~!!：\n\n'
         logger.info(keywords)
         if str_content == '':
-            str_content = '网页：' + web_url_list[0].split('/')[2] + '\n今日无匹配项~！'
+            str_content = '网页：' + job_dict['web_url'] + '  当前查询时间点：' + time.strftime("%m/%d/%Y %H:%M") + '，暂无无匹配项~！'
         send_email(str_content, username, ReceiversEmail)
         if trigger != 'cron':
             if str_type == 'one':

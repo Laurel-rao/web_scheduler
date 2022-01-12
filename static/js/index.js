@@ -103,7 +103,7 @@ const app = new Vue({
         //遍历数据添加到pageJobs中
         this.pageJobs.push(this.tableData[i]);
         //判断是否达到一页的要求
-        if (this.pageJobs.lenth === this.pagesize) break;
+        if (this.pageJobs.length === this.pagesize) break;
       }
     },
 

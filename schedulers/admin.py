@@ -147,11 +147,11 @@ def clear_job():
     print('clear_job')
     jobs_obj = SchedulersJob.objects.all()
     for i in jobs_obj:
-        if i.enable == '0':
+        if i.enable == '0' or i.job_id != '':
             SchedulersJob.objects.filter(id=i.id).update(next_time=None, job_id='', enable='1')
     jobs2_obj = SchedulersJob2.objects.all()
     for i in jobs2_obj:
-        if i.enable == '0':
+        if i.enable == '0' or i.job_id != '':
             SchedulersJob2.objects.filter(id=i.id).update(next_time=None, job_id='', enable='1')
     return True
 
