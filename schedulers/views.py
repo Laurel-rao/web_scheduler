@@ -50,7 +50,7 @@ scheduler.start()
 def get_browser():
     chrome_options = webdriver.ChromeOptions()
     # 使用headless无界面浏览器模式
-    # chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
+    chrome_options.add_argument('--headless')  # 增加无界面选项。代码测试无误后可去除注释
     chrome_options.add_argument('--disable-gpu')  # 如果不加这个选项，有时定位会出现问题
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--ignore-certificate-errors')  # 处理ssl证书错误问题
@@ -66,8 +66,8 @@ def get_browser():
         }
     }
     chrome_options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(options=chrome_options)
-    # driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=chrome_options)
+    # driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=chrome_options)
     return driver
 
 
