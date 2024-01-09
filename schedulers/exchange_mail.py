@@ -40,5 +40,5 @@ class ExchangeEmail:
 
 
 if __name__ == '__main__':
-    Email = ExchangeEmail('ssecc\\liubin', '4rfvgHNJI(*&^%', 'mail.ssecc.com.cn', 'liubin@ssecc.com.cn')
-    Email.send_email("liubin@ssecc.com.cn", "abc", "def")
+    Email = ExchangeEmail('username', 'password', 'mail.ssecc.com.cn', 'xxxx@ssecc.com.cn')
+    Email.send_email("xxxx@ssecc.com.cn", "abc", "def")

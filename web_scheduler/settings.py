@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'schedulers.apps.SchedulersConfig',
     'corsheaders',
+    'django_apscheduler',
+    "rest_framework",
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +150,9 @@ LOGIN_URL = '/login/'
 SESSION_COOKIE_AGE = 1800  # Session的cookie失效日期（2周）（数字为秒数）（默认）
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 是否关闭浏览器使得Session过期（默认）
 SESSION_SAVE_EVERY_REQUEST = True  # 是否每次请求都保存Session，默认修改之后才保存（默认）
+
+TYPES = (
+    ('0', '脚本任务'),
+    ('1', 'API调用任务'),
+    ('2', '通用任务'),
+)

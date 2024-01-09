@@ -2,15 +2,15 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>定时任务管理系统</title>
     <!--引入外部的样式文件-->
-    <link rel="stylesheet" href="/static/css/index.css" />
+    <link rel="stylesheet" href="/static/css/index.css"/>
     <!-- 使用CDN引入vue模块 -->
     <script src="/static/js/vue@2.6.12"></script>
     <!-- 引入样式 -->
-    <link rel="stylesheet" href="/static/css/element_ui_index.css" />
+    <link rel="stylesheet" href="/static/css/element_ui_index.css"/>
     <!-- 引入组件库 -->
     <script src="/static/js/element_ui_index.js"></script>
     <!-- 引入Axios的组件库 -->
@@ -19,163 +19,222 @@
 </head>
 
 <body>
-    <div id="app">
-        <el-container>
-            <el-header style="height: 80px">
-                <el-row>
-                    <el-col :span="21">
-                        定时任务管理系统
-                        <small id="time1" style="font-size:medium;">
-                            <script type="text/javascript">
-                                //非动态显示
-                                //document.getElementById('time1').innerHTML=new Date().toLocaleString()+' 星期'+'日一二三四五六'.charAt(new Date().getDay());
-                                //动态显示
-                                setInterval(
-                                    "document.getElementById('time1').innerHTML=new Date().toLocaleString()+' 星期'+'日一二三四五六'.charAt(new Date().getDay());",
-                                    1000);
-                            </script>
-                        </small>
-                    </el-col>
-                    <el-col :span="3">
-                        <small style="font-size:small;text-align: right" >
-                            {% verbatim myblock %}
+<div id="app">
+    <el-container>
+        <el-header style="height: 80px">
+            <el-row>
+                <el-col :span="21">
+                    定时任务管理系统
+                    <small id="time1" style="font-size:medium;">
+                        <script type="text/javascript">
+                            //非动态显示
+                            //document.getElementById('time1').innerHTML=new Date().toLocaleString()+' 星期'+'日一二三四五六'.charAt(new Date().getDay());
+                            //动态显示
+                            setInterval(
+                                "document.getElementById('time1').innerHTML=new Date().toLocaleString()+' 星期'+'日一二三四五六'.charAt(new Date().getDay());",
+                                1000);
+                        </script>
+                    </small>
+                </el-col>
+                <el-col :span="3">
+                    <small style="font-size:small;text-align: right">
+                        {% verbatim myblock %}
                             当前用户：{{ name }}
-                            {% endverbatim myblock %}
-                        </small>
-                    </el-col>
-                </el-row>
-
-
-            </el-header>
+                        {% endverbatim myblock %}
+                    </small>
+                </el-col>
+            </el-row>
+        </el-header>
+        <el-container>
+            <el-aside width="200px">
+                <el-menu v-bind:default-active="activeIndex" class="el-menu-vertical-demo" @select="handleSelect">
+                    <el-menu-item index="1">
+                        <i class="el-icon-date"></i>
+                        <span slot="title">任务明细</span>
+                    </el-menu-item>
+                    <el-menu-item index="2">
+                        <i class="el-icon-setting"></i>
+                        <span slot="title">后台管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="3">
+                        <i class="el-icon-circle-close"></i>
+                        <span slot="title">退出系统</span>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
             <el-container>
-                <el-aside width="200px">
-                    <el-menu v-bind:default-active="activeIndex" class="el-menu-vertical-demo" @select="handleSelect">
-                        <el-menu-item index="1">
-                            <i class="el-icon-date"></i>
-                            <span slot="title">任务明细</span>
-                        </el-menu-item>
-                        <el-menu-item index="2">
-                            <i class="el-icon-setting"></i>
-                            <span slot="title">后台管理</span>
-                        </el-menu-item>
-                        <el-menu-item index="3">
-                            <i class="el-icon-circle-close"></i>
-                            <span slot="title">退出系统</span>
-                        </el-menu-item>
-                    </el-menu>
-                </el-aside>
-                <el-container>
-                    <el-main>
-                        <!-- 面包屑导航 -->
-                        <el-breadcrumb separator="/">
-                            <el-breadcrumb-item>首页</el-breadcrumb-item>
-                            <el-breadcrumb-item>任务明细</el-breadcrumb-item>
-                        </el-breadcrumb>
-
-                        <!-- 表单 -->
-                        <el-form :inline="true" style="margin-top: 20px" size="mini">
-                            <el-row>
-                                <el-col :span="18">
-                                    <el-form-item label="请输入查询条件">
-                                        <el-input v-model=inputstr placeholder="请输入查询条件" style="width: 320px">
-                                        </el-input>
-                                    </el-form-item>
-                                    <el-form-item>
-                                        <el-button @click='query_job()' type="primary" icon="el-icon-search">查询
-                                        </el-button>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :span='6' style="text-align: right;">
-                                    <el-form-item>
-                                        <el-button @click='refresh()' type="primary" icon="el-icon-refresh">数据刷新</el-button>
-                                        <el-button @click='test_email()' type="primary" icon="el-icon-s-promotion">邮件测试
-                                        </el-button>
-                                    </el-form-item>
-                                </el-col>
-                            </el-row>
-                        </el-form>
-                        <!-- 表格 -->
-                        <el-table :data="pageJobs" border stripe style="width: 100%" size="mini" @cell-dblclick="cell_dblclick">
-                            <!-- <el-table-column type="selection">
-                            </el-table-column> -->
-                            <el-table-column type="index" label="序号" width="50">
-                            </el-table-column>
-                            <el-table-column prop="name" label="任务名称" width="160">
-                            </el-table-column>
-                            <el-table-column prop="web_url" label="监控网址" width="200">
-                            </el-table-column>
-                            <el-table-column prop="keywords" label="关键字" width="150">
-                            </el-table-column>
-                            <el-table-column prop="trigger" label="触发器类型" width="90">
-                            </el-table-column>
-                            <el-table-column prop="datetime" label="创建时间" width="180">
-                            </el-table-column>
-                            <el-table-column prop="remarks" label="备注">
-                            </el-table-column>
-                            <el-table-column  label="操作" align='center' width="80px" >
-                                <template slot-scope="scope" >
-                                    <el-button @click="handleClick(scope.row)" type="success" size="small" v-if="scope.row.enable==='1'" >启用</el-button>
-                                    <el-button @click="handleClick(scope.row)" type="danger" size="small" v-else-if="scope.row.enable==='0'">停用</el-button>
-                                    <el-button @click="handleClick(scope.row)" type="info" disabled size="small" v-else-if="scope.row.enable==='2'" >失效</el-button>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                        <!-- 分页 -->
-                        <el-row style="margin-top: 10px;">
-                            <!-- <el-col :span="8" style="text-align: left;">
-                                <el-button type="primary" icon="el-icon-video-play" size="mini">批量启动</el-button>
-                            </el-col> -->
-                            <el-col :span="24" style="text-align: right;">
-                                <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-                                    :current-page="currentPage" :page-sizes="[5, 10, 25, 50]" :page-size="pagesize"
-                                    layout="total, sizes, prev, pager, next, jumper" :total="total">
-                                </el-pagination>
+                <el-main>
+                    <!-- 面包屑导航 -->
+                    <el-breadcrumb separator="/">
+                        <el-breadcrumb-item>首页</el-breadcrumb-item>
+                        <el-breadcrumb-item>任务明细</el-breadcrumb-item>
+                    </el-breadcrumb>
+                    <!-- 表单 -->
+                    <el-form :inline="true" style="margin-top: 20px" size="mini">
+                        <el-row>
+                            <el-col :span="18">
+                                <el-form-item label="请输入查询条件">
+                                    <el-input v-model=inputstr placeholder="请输入查询条件" style="width: 320px">
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button @click='query_job()' type="primary" icon="el-icon-search">查询
+                                    </el-button>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span='6' style="text-align: right;">
+                                <el-form-item>
+                                    <el-button @click='refresh()' type="primary" icon="el-icon-refresh">数据刷新</el-button>
+                                    <el-button @click='test_email()' type="primary" icon="el-icon-s-promotion">邮件测试
+                                    </el-button>
+                                </el-form-item>
                             </el-col>
                         </el-row>
-                        <!-- 任务明细弹出框 -->
-                        <el-dialog title="任务明细" :visible.sync="dialogVisible" width="50%">
-                            <el-form :inline="true" v-model='job_detailed' size="mini" label-width="80px">
-                                <el-form-item label="任务名称">
-                                    <el-input v-model='job_detailed.name'></el-input>
-                                </el-form-item>
-                                <el-form-item label="关键字">
-                                    <el-input v-model='job_detailed.keywords'></el-input>
-                                </el-form-item>
-                                <el-form-item label="监控网址">
-                                    <el-input style="width: 450px;" v-model='job_detailed.web_url'></el-input>
-                                </el-form-item>
-                                <el-form-item label="创建时间">
-                                    <el-input v-model='job_detailed.datetime'></el-input>
-                                </el-form-item>
-                                <el-form-item label="下次时间">
-                                    <el-input v-model='job_detailed.next_time'></el-input>
-                                </el-form-item>
-                                <el-form-item label="触发器">
-                                    <el-input v-model='job_detailed.trigger'></el-input>
-                                </el-form-item>
-                                <el-form-item label="任务状态">
-                                    <el-input v-model='job_detailed.enable'></el-input>
-                                </el-form-item>
-                                <el-form-item label="备注">
-                                    <el-input type="textarea" style="width: 450px;" v-model='job_detailed.remarks'></el-input>
-                                </el-form-item>
-                            </el-form>
-                            <span slot="footer" class="dialog-footer">
+                    </el-form>
+                    <!-- 表格 -->
+                    <el-table :data="pageJobs" border stripe style="width: 100%" size="mini"
+                              @cell-dblclick="cell_dblclick">
+                        <!-- <el-table-column type="selection">
+                        </el-table-column> -->
+                        <el-table-column type="index" label="序号" width="50">
+                        </el-table-column>
+                        <el-table-column prop="name" label="任务名称" width="160">
+                        </el-table-column>
+                        <el-table-column prop="next_time" label="下次执行时间" width="200">
+                        </el-table-column>
+                        <el-table-column prop="type" label="任务类型" width="150">
+                            <template slot-scope="scope">
+                                <span v-if="scope.row.type ==='0'">脚本执行任务</span>
+                                <span v-else-if="scope.row.type ==='1'">API执行任务</span>
+                                <span v-else-if="scope.row.type ==='2'">通用函数任务</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="trigger" label="触发器类型" width="90">
+                        </el-table-column>
+                        <el-table-column prop="datetime" label="创建时间" width="180px">
+                        </el-table-column>
+                        <el-table-column prop="remarks" label="备注">
+                        </el-table-column>
+                        <el-table-column label="操作" align='center' width="220px">
+                            <template slot-scope="scope">
+                                <el-button @click="handleClick(scope.row)" type="success" size="small"
+                                           v-if="scope.row.enable==='1'">启用
+                                </el-button>
+                                <el-button @click="handleClick(scope.row)" type="danger" size="small"
+                                           v-else-if="scope.row.enable==='0'">停用
+                                </el-button>
+                                <el-button @click="handleClick(scope.row)" type="info" size="small"
+                                           v-else-if="scope.row.enable==='2'">失效
+                                </el-button>
+                                <el-button @click="handleSelect(0, scope.row)" type="success" size="small">编辑
+                                </el-button>
+                                <el-button @click="logClick(scope.row)" type="success" size="small">日志</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <el-row style="margin-top: 10px;">
+                        <!-- <el-col :span="8" style="text-align: left;">
+                            <el-button type="primary" icon="el-icon-video-play" size="mini">批量启动</el-button>
+                        </el-col> -->
+                        <el-col :span="24" style="text-align: right;">
+                            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                                           :current-page="currentPage" :page-sizes="[5, 10, 25, 50]"
+                                           :page-size="pagesize"
+                                           layout="total, sizes, prev, pager, next, jumper" :total="total">
+                            </el-pagination>
+                        </el-col>
+                    </el-row>
+                    <!-- 任务明细弹出框 -->
+                    <el-dialog title="任务明细" :visible.sync="dialogVisible" width="50%">
+                        <el-form :inline="true" v-model='job_detailed' size="mini" label-width="80px">
+                            <el-form-item label="任务名称">
+                                <el-input v-model='job_detailed.name'></el-input>
+                            </el-form-item>
+                            <el-form-item label="任务类型">
+                                <el-input v-if="job_detailed.type == 0" value="脚本执行任务"></el-input>
+                                <el-input v-else-if="job_detailed.type == 1" value="API执行任务"></el-input>
+                                <el-input v-else-if="job_detailed.type == 2" value="通用函数任务"></el-input>
+                            </el-form-item>
+                            <el-form-item label="下次执行时间">
+                                <el-input style="width: 450px;" v-model='job_detailed.next_time'></el-input>
+                            </el-form-item>
+                            <el-form-item label="创建时间">
+                                <el-input v-model='job_detailed.datetime'></el-input>
+                            </el-form-item>
+                            <el-form-item label="下次时间">
+                                <el-input v-model='job_detailed.next_time'></el-input>
+                            </el-form-item>
+                            <el-form-item label="触发器">
+                                <el-input v-model='job_detailed.trigger'></el-input>
+                            </el-form-item>
+                            <el-form-item label="任务状态">
+                                <el-input v-model='job_detailed.enable'></el-input>
+                            </el-form-item>
+                            <el-form-item label="备注">
+                                <el-input type="textarea" style="width: 450px;"
+                                          v-model='job_detailed.remarks'></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <span slot="footer" class="dialog-footer">
                                 <el-button type="primary" @click="dialogVisible = false">确定</el-button>
                             </span>
-                        </el-dialog>
-                    </el-main>
-                    <el-footer style="height: 30px">定时任务管理系统 版权所有：liubin（<a href="mailto:lucklyme@163.com">lucklyme@163.com</a>) | 2020-2021</el-footer>
-                </el-container>
+                    </el-dialog>
+                    <el-dialog :title="jobLogTitle" :visible.sync="jobLogDialogVisible" width="60%" top="2%"
+                               :before-close="closeJobLog">
+                        <el-row :gutter="2" class="text-vertical-align">
+                            <el-col :span="3">
+                                <el-label>是否刷新</el-label>
+                            </el-col>
+                            <el-col :span="2">
+                                <el-switch v-model="isRefreshLog" on-text="是" off-text="否"
+                                           @change="updateLogParam"></el-switch>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-label>刷新间隔(秒)</el-label>
+                            </el-col>
+                            <el-col :span="4">
+                                <el-input size="small" v-model="refreshLogGap" @change="updateLogParam"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-label>日志长度</el-label>
+                            </el-col>
+                            <el-col :span="4">
+                                <el-input  size="small" v-model="refreshLogLength" @change="updateLogParam"></el-input>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-button @click="refreshLog" size="small" type="success">刷新</el-button>
+                            </el-col>
+                        </el-row>
+                        <el-input
+                                type="textarea"
+                                rows="25"
+                                id="myLogTextarea"
+                                readonly="true"
+                                placeholder="请输入内容"
+                                resize="none"
+                                v-model="text_logs">
+                        </el-input>
+                    </el-dialog>
+                </el-main>
             </el-container>
         </el-container>
-    </div>
+    </el-container>
+</div>
 </body>
 <script>
-    window.onunload = function(event) {
-        axios
-        .get("logout/");
-    }
+    axios.interceptors.response.use((response) => {
+        // 2xx 范围内的状态码都会触发该函数。
+        // 对响应数据做点什么
+        return response;
+    }, (error) => {
+        // 超出 2xx 范围的状态码都会触发该函数。
+        // 对响应错误做点什么, 退出登录
+        if (error.response.status === 403) {
+            window.location.href = "/logout"
+        }
+        return Promise.reject(error);
+    });
 </script>
 
 </html>

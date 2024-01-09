@@ -1,1 +1,3 @@
-defualt_app_config = 'schedulers.apps.SchedulersConfig'
+default_app_config = 'schedulers.apps.SchedulersConfig'
+
+

@@ -14,16 +14,27 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
+
 from schedulers import views
+from schedulers.auto_api import JobLogViewSet
+router = SimpleRouter()
+router.register('api/job_log', JobLogViewSet, basename='job_log')
 
 urlpatterns = [
+    # 管理页面，管理任务创建，触发器创建等
     path('admin/', admin.site.urls),
-    path('jobs/', views.get_job),
-    path('jobs/query', views.query_job),
-    path('jobs/modify', views.modify_jobs),
+    # 消息提示
     path('email/test', views.email_test),
+    # 用户 登录
     path('', views.index),
     path('login/', views.login_web),
     path('logout/', views.logout_view),
+    # 任务管理
+    path('jobs/', views.get_job),
+    path('jobs/query', views.query_job),
+    path('jobs/modify', views.modify_jobs),
+    path('', include(router.urls)),
 ]
+
