@@ -154,7 +154,9 @@ class CommonJobHandler(JobHandler):
         except Exception as e:
             msg = f"Error %s" % traceback.format_exc()
             logger.error(msg)
+            level = 1
         else:
+            level = 0
             msg = f"result: {result}"
 
-        write_job_log(self.job_type, self.job_id, msg=msg)
+        write_job_log(self.job_type, self.job_id, msg=msg, level=level)
