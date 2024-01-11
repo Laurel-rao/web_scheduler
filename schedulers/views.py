@@ -131,7 +131,7 @@ def handler(cur_job_id, job_dict, username):
 def send_email(str_content, username, ReceiversEmail):
     req = {
         'code': 1,  # 1为成功，0为失败
-        'msg': ''
+        'msg': 'Ok'
     }
 
     # 设置服务器所需信息
@@ -190,7 +190,7 @@ def send_email(str_content, username, ReceiversEmail):
             return req
         except smtplib.SMTPException as e:
             req['code'] = 0
-            req['msg'] = str(e)
+            req['msg'] = str(traceback.format_exc())
             logger.error('email-error2 %s' % traceback.format_exc())  # 打印错误
             return req
 
