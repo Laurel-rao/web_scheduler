@@ -6,9 +6,6 @@
 前端为：vue+element
 后端为：python+django
 
-#### 运行
-
-- `python manage.py runserver`
 
 #### 系统界面截图
 1.  前端截图
@@ -19,15 +16,15 @@
 
 
 #### 软件架构
-前端为：vue+element
-后端为：python+django
+前端为：vue2+element+无需 nodejs
+后端为：python3.8.5+django 3.8
 
 
 #### 安装教程
 
 1.  系统中完成python3安装后，使用`pip install -r requirements.txt`指令完成后端所需python库的安装。（注：建议使用`virtualenv`等）
 2.  环境搭建完成后，使用`python3 manage.py makemigrations`以及`python3 manage.py migrate`指令完成数据库初始化。如出现报错，可先将admin.py中最后一行的clear_job()注释掉，待数据库构建完成后再解除注释即可。
-3.  使用`python3 manage.py createsuperuser`指令完成后端管理员账号的创建
+3.  使用`python3 manage.py createsuperuser`指令完成后端管理员账号的创建, 默认账户名密码 admin admin, 可自行切换到 mysql 后重新创建
 4.  直接使用`python3 manage.py runserver 0.0.0.0:8000`启动。
 
 #### 基本使用说明
