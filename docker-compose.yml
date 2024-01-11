@@ -4,7 +4,7 @@ services:
     image: python:3.8.5
     container_name: web_scheduler
     ports:
-      - 8000:8000
+      - 8999:8999
     volumes:
       - ./:/data
     working_dir: /data

@@ -42,14 +42,14 @@ So, just for sure, you can create a issue to make your idea to be true.
     3. create a superuser
         1. `python manage.py createsuperuser`
 
-#### 2. run it
-1. open in your browser http://127.0.0.1:8000
-    - `python manage.py 0.0.0.0:8000`
+
    
    
 ### Run from docker container
 
-- 
+```
+docker run -d -p 8999:8999 laurelrao/web_scheduler:v1
+```
 
 ### Run as Docker-compose
 
@@ -59,8 +59,9 @@ git pull https://github.com/Laurel-rao/web_scheduler.git
 docker-compose up -d
 
 ```
-- open it `http://127.0.0.1:8000`
-- admin/admin
+### open it
+1. open in your browser http://127.0.0.1:8999
+    - `python manage.py runserver 0.0.0.0:8999`
 
 
 
