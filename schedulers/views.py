@@ -2,13 +2,10 @@ import time
 import traceback
 from threading import Thread
 
-import requests
-import urllib3
 import smtplib
 from email.mime.text import MIMEText
 
 from apscheduler.jobstores.base import JobLookupError
-from bs4 import BeautifulSoup
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
