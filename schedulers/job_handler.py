@@ -148,7 +148,7 @@ class CommonJobHandler(JobHandler):
     def run(self):
         path = self.job_dict.get("path")
         params = self.parse(self.job_dict.get("params"))
-        params.update({"job_id": self.job_id, "job_type": "2"})
+        params.update({"job_id": self.job_id, "job_type": "2", "recv_email": self.job_dict.get("ReceiversEmail")})
         try:
             result = execute_function(path, params)
         except Exception as e:

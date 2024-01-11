@@ -161,7 +161,7 @@ def send_email(str_content, username, ReceiversEmail):
         except Exception as e:
             req['code'] = 0
             req['msg'] = str(traceback.format_exc())
-            print('email-error', e)  # 打印错误
+            logger.error('email-error1 %s' % e)  # 打印错误
             return req
     elif EmailType == '2':
         # 邮件主题
@@ -185,12 +185,13 @@ def send_email(str_content, username, ReceiversEmail):
             smtpObj.sendmail(
                 sender, receivers, message.as_string())
             # 退出
+
             smtpObj.quit()
             return req
         except smtplib.SMTPException as e:
             req['code'] = 0
             req['msg'] = str(e)
-            print('email-error', e)  # 打印错误
+            logger.error('email-error2 %s' % traceback.format_exc())  # 打印错误
             return req
 
 

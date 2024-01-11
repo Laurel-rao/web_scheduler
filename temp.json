@@ -1,0 +1,96 @@
+{
+  'data': {
+    'fastStartTime': 1713486600000,
+    'lastEndTime': 1713704400000,
+    'showSessionModelList': [
+      {
+        'beginTime': '2024-04-19 08:30:00',
+        'buttonType': 0,
+        'createTime': 1703818194000,
+        'endTime': '2024-04-21 21:00:00',
+        'fenXiao': True,
+        'priceInfoModelList': [
+          {
+            'category': '1',
+            'num': 0,
+            'price': 48000,
+            'priceId': '658cdcce6f19fc000190c73c',
+            'priceName': 'C三日票 3 DAY TICKET',
+            'priceShowStatus': 'NO_TICKET_REGISTER',
+            'sellOutStatus': 0,
+            'sessionSaleTime': 1704801600000,
+            'sessionStatus': 'ONSALE',
+            'stock': 0,
+            'ticketDiscountPrice': 0,
+            'ticketOriginalPrice': 48000
+          },
+          {
+            'category': '1',
+            'num': 0,
+            'price': 48000,
+            'priceId': '658cdcce6f19fc000190c73d',
+            'priceName': 'L三日票 3 DAY TICKET',
+            'priceShowStatus': 'NO_TICKET_REGISTER',
+            'sellOutStatus': 0,
+            'sessionSaleTime': 1704801600000,
+            'sessionStatus': 'ONSALE',
+            'stock': 0,
+            'ticketDiscountPrice': 0,
+            'ticketOriginalPrice': 48000
+          },
+          {
+            'category': '1',
+            'num': 0,
+            'price': 48000,
+            'priceId': '658cdcce6f19fc000190c73e',
+            'priceName': 'J三日票 3 DAY TICKET',
+            'priceShowStatus': 'NO_TICKET_REGISTER',
+            'sellOutStatus': 0,
+            'sessionSaleTime': 1704801600000,
+            'sessionStatus': 'ONSALE',
+            'stock': 0,
+            'ticketDiscountPrice': 0,
+            'ticketOriginalPrice': 48000
+          },
+          {
+            'category': '1',
+            'num': 0,
+            'price': 48000,
+            'priceId': '658cdcce6f19fc000190c73f',
+            'priceName': 'F三日票 3 DAY TICKET',
+            'priceShowStatus': 'NO_TICKET_REGISTER',
+            'sellOutStatus': 0,
+            'sessionSaleTime': 1704801600000,
+            'sessionStatus': 'ONSALE',
+            'stock': 0,
+            'ticketDiscountPrice': 0,
+            'ticketOriginalPrice': 48000
+          }
+        ],
+        'saleTime': 1704801600000,
+        'sessionId': '658cdcce6f19fc000190c73b',
+        'sessionName': '三日票 3 DAY TICKET',
+        'sessionSettingInfoModel': {
+          'deliverMethod': [
+            '2'
+          ],
+          'realNameBuyLimitType': 'ONE_PER_TICKET',
+          'realNameIdType': [
+            'ID_CARD',
+            'PASSPORT',
+            'MAINLAND_TRAVEL_PERMIT_TAIWAN',
+            'MAINLAND_TRAVEL_PERMIT_HK_MC'
+          ]
+        },
+        'sessionShowStatus': 'NO_TICKET_REGISTER',
+        'sessionStatus': 'ONSALE',
+        'sort': 0,
+        'ticketPresent': False,
+        'ticketTip': '请携带身份证实名入场',
+        'userBuyLimit': 4
+      }
+    ]
+  },
+  'rtnCode': '10000',
+  'rtnMessage': '成功'
+}
