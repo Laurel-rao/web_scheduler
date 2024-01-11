@@ -1,0 +1,11 @@
+version: "3.0"
+services:
+  web_scheduler:
+    image: python:3.8.5
+    container_name: web_scheduler
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/data
+    working_dir: /data
+    command: bash ./start.sh

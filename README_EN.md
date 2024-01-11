@@ -47,14 +47,20 @@ So, just for sure, you can create a issue to make your idea to be true.
     - `python manage.py 0.0.0.0:8000`
    
    
-### Run from scripts
+### Run from docker container
 
 - 
 
 ### Run as Docker-compose
 
-- 
-``````
+```
+
+git pull https://github.com/Laurel-rao/web_scheduler.git
+docker-compose up -d
+
+```
+- open it `http://127.0.0.1:8000`
+- admin/admin
 
 
 
